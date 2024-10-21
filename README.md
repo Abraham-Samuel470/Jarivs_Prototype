@@ -1,2 +1,3 @@
 # Jarivs_Prototype
-Jarvis is an AI personal assistant prototype that integrates voice control, text-to-speech, and natural language processing. It can open desktop applications, fetch the data and perform Wikipedia and Google searches efficiently.
+Jarvis is an AI personal assistant prototype inspired by the movie and comics *Iron Man*. It enhances productivity through voice control, natural language processing, and text-to-speech capabilities. Jarvis can open desktop applications like Notepad and YouTube, perform Wikipedia searches, and provide the current day, date, and time. It also greets the user upon activation, offering an interactive and personalized experience. Designed to streamline routine tasks, Jarvis aims to be a practical tool for daily efficiency, much like its fictional counterpart in *Iron Man*.
+It can open desktop applications, fetch the data and perform Wikipedia and Google searches efficiently.
