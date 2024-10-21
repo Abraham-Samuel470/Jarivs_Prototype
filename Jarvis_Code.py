@@ -100,19 +100,11 @@ if __name__=="__main__":
                     npath="C:\\Windows\\system32\\notepad.exe"
                     os.startfile(npath)
                     speak("Opening Notepad Sir")
-                # elif " close it " in query:
-                #     os.system("taskkill /f im notepad.exe")
-                #     speak("Closing notepad sir")
                 elif " close notepad" in query:
                     notepad_windows = gw.getWindowsWithUntitle('Notepad')
                     for window in notepad_windows:
                         window.close()
                     speak("Notepad is now closed.")
-
-        # elif "open youtube" in query:
-        #     npath="https://www.youtube.com/?bp=wgUCEAE%3D "
-        #     os.startfile(npath)
-        #     speak("Opening Youtube Sir")
     #2 cmd prompt
                 elif "open command prompt" in query:
                     os.system("start cmd")
@@ -136,31 +128,13 @@ if __name__=="__main__":
                     speak("It's my pleasure sir")
                 elif "no "in query:
                     speak("Sorry sir, I will come up with something else")
-                # elif 'take a note' in query:
-                #     speak('What should I write?')
-                #
-                #     note_text = takecommand()
-                #     if (note_text != None):
-                #         f = open('notes.txt', 'a')
-                #         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-                #         f.write(timestamp + '\n')
-                #         note = note_text + '\n\n'
-                #         f.write(note)
-                #         f.close()
-
     #5 webbrowser
-        # elif " open youtube " in query:
-        #     webbrowser.open("www.youtube.com")
-        #     speak("opening youtube")
                 elif "open youtube" in query:
                     npath="https://www.youtube.com/"
                     os.startfile(npath)
                     speak("opening youtube")
                 elif " are you deaf" in query:
                     speak("no you is blind and i don't have ears")
-                # elif "open youtube " in query:
-                #     webbrowser.open_new_tab('https://www.youtube.com/')
-                #     speak("opening youtube")
     #6 chrome
                 elif "open chrome" in query:
                     webbrowser.open('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe')
@@ -177,7 +151,6 @@ if __name__=="__main__":
                 elif " terminate " in query:
                     speak("cool , thanks for using me, have a good day sir")
                     system.exit(-1)
-        # speak("sir, do you have any other work")
                 elif 'joke' in query:
                     joke = pyjokes.get_joke()
                     speak(joke)
