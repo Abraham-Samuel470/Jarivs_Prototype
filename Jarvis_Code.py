@@ -28,13 +28,13 @@ def takecommand():
     with sr.Microphone() as source:
         print("listening...")
         r.pause_threshold=1
-        audio= r.listen(source,timeout=7,phrase_time_limit=10)
+        audio= r.listen(source,timeout=7,phrase_time_limit=5)
     try:
         print("Recognizing")
         query= r.recognize_google(audio, language='en-in')
         print(f"user said :{query}")
     except Exception as e :
-        # speak("Sir, i couldn't get it , please say that again please")
+        #speak("Sir, i couldn't get it , please say that again please")
         return "none"
     return query
 #date,day,time
@@ -68,12 +68,6 @@ def jarvis_greeting():
         speak("Sir, it's almost your bedtime, you should pack things up")
 
 
-
-
-
-
-
-
 if __name__=="__main__":
     while True:
         query = takecommand().lower()
@@ -85,8 +79,12 @@ if __name__=="__main__":
                 if "go to sleep" in query :
                     speak("OK sir, you can call me anytime")
                     break
+                # This command will stop the program completely.
+                elif "exit" in query or "stop" in query:
+                    speak("Goodbye, sir. Have a great day!")
+                    sys.exit()  
 
-        # logic building for tasks
+                # logic building for tasks
     #1 notepad
                 elif 'how are you' in query:
                     speak("I am fine sir, what about you")
@@ -100,11 +98,19 @@ if __name__=="__main__":
                     npath="C:\\Windows\\system32\\notepad.exe"
                     os.startfile(npath)
                     speak("Opening Notepad Sir")
+                # elif " close it " in query:
+                #     os.system("taskkill /f im notepad.exe")
+                #     speak("Closing notepad sir")
                 elif " close notepad" in query:
                     notepad_windows = gw.getWindowsWithUntitle('Notepad')
                     for window in notepad_windows:
                         window.close()
                     speak("Notepad is now closed.")
+                            #OR use the below
+        # elif "open youtube" in query:
+        #     npath="https://www.youtube.com/?bp=wgUCEAE%3D "
+        #     os.startfile(npath)
+        #     speak("Opening Youtube Sir")
     #2 cmd prompt
                 elif "open command prompt" in query:
                     os.system("start cmd")
@@ -127,14 +133,26 @@ if __name__=="__main__":
                 elif "yes" in query:
                     speak("It's my pleasure sir")
                 elif "no "in query:
-                    speak("Sorry sir, I will come up with something else")
+                    speak("Sorry sir, I will come up with something else"
+
     #5 webbrowser
+                 #OR use the below
+                
+        # elif " open youtube " in query:
+        #     webbrowser.open("www.youtube.com")
+        #     speak("opening youtube")
                 elif "open youtube" in query:
                     npath="https://www.youtube.com/"
                     os.startfile(npath)
                     speak("opening youtube")
                 elif " are you deaf" in query:
                     speak("no you is blind and i don't have ears")
+                    
+                            #OR use the below
+                
+                # elif "open youtube " in query:
+                #     webbrowser.open_new_tab('https://www.youtube.com/')
+                #     speak("opening youtube")
     #6 chrome
                 elif "open chrome" in query:
                     webbrowser.open('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe')
@@ -148,12 +166,9 @@ if __name__=="__main__":
                     cm = takecommand().lower()
                     webbrowser.open(f"{cm}")
                     speak("here's what i found")
-                elif " terminate " in query:
-                    speak("cool , thanks for using me, have a good day sir")
-                    system.exit(-1)
+    #8 Jokes
                 elif 'joke' in query:
                     joke = pyjokes.get_joke()
                     speak(joke)
-                elif "Stop it" in query:
-                    break
+                
 
