@@ -8,81 +8,81 @@ import requests
 import webbrowser
 import sys
 import pyjokes
-import subprocess
+import serial  # For communicating with Arduino
 
+# Initialize serial communication with Arduino
+try:
+    arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)  # Replace 'COM3' with your Arduino port
+    print("Connected to Arduino")
+except Exception as e:
+    print("Could not connect to Arduino. Ensure the correct port is specified.")
+    arduino = None
 
-# inititalzing text to speech engine
-engine=pyttsx3.init('sapi5') # init will inititalize it
-voice=engine.getProperty('voices')# stroes the voice in voice variable
-engine.setProperty('voice',voice[0].id)# give the voice to speak
-# 0= male voice and 1= female voice or cn change between 0-1(i.e 0.2,0.5)
+# Initialize text-to-speech engine
+engine = pyttsx3.init('sapi5')
+voice = engine.getProperty('voices')
+engine.setProperty('voice', voice[0].id)
 
-# by this Jarvis will speak
 def speak(audio):
     engine.say(audio)
     print(audio)
     engine.runAndWait()
-# our voice to text in runtime
+
 def takecommand():
-    r=sr.Recognizer()
+    r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("listening...")
-        r.pause_threshold=1
-        audio= r.listen(source,timeout=7,phrase_time_limit=5)
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source, timeout=7, phrase_time_limit=5)
     try:
-        print("Recognizing")
-        query= r.recognize_google(audio, language='en-in')
-        print(f"user said :{query}")
-    except Exception as e :
-        #speak("Sir, i couldn't get it , please say that again please")
+        print("Recognizing...")
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}")
+    except Exception as e:
         return "none"
-    return query
-#date,day,time
+    return query.lower()
+
 def get_date_time():
-    now=datetime.now()
-    day=now.strftime("%A")
-    date=now.strftime("%B %d, %Y")
-    time=now.strftime("%I:%M %p")
-    return day,date,time
+    now = datetime.now()
+    day = now.strftime("%A")
+    date = now.strftime("%B %d, %Y")
+    time = now.strftime("%I:%M %p")
+    return day, date, time
 
 def jarvis_greeting():
-    day,date,time=get_date_time()
+    day, date, time = get_date_time()
     hour = int(datetime.now().strftime("%H"))
-    #speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
-    if hour>0 and hour<=6:
-        speak("Sir, it's so late, let's call it a day and you should go to sleep ")
-        speak("If you still have any work at this hour i will assist you but please take care of your health ")
-        speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
-    elif hour>6 and hour<=12:
-        speak("Good morning sir ")
-        speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
+    if hour >= 0 and hour < 6:
+        speak("Sir, it's late. Let's call it a day. If you still have work, I'm here to assist.")
+    elif hour >= 6 and hour < 12:
+        speak("Good morning, sir.")
+    elif hour >= 12 and hour < 16:
+        speak("Good afternoon, sir.")
+    elif hour >= 16 and hour < 21:
+        speak("Good evening, sir.")
+    elif hour >= 21 and hour < 23:
+        speak("Sir, it's almost bedtime. You should pack things up.")
+    speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
 
-    elif(hour>12 and hour<=16):
-        speak("Good Afternoon Sir ")
-        speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
-
-    elif(hour>16 and hour<=21):
-        speak("Good Evening sir")
-        speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
-    elif(hour>21 and hour<23):
-        speak("Sir, it's almost your bedtime, you should pack things up")
-
-
-if __name__=="__main__":
+if __name__ == "__main__":
     while True:
-        query = takecommand().lower()
+        query = takecommand()
         if "wake up" in query:
-            #wish()
             jarvis_greeting()
             while True:
                 query = takecommand().lower()
-                if "go to sleep" in query :
-                    speak("OK sir, you can call me anytime")
+                if "go to sleep" in query:
+                    speak("OK sir, you can call me anytime.")
                     break
-                # This command will stop the program completely.
                 elif "exit" in query or "stop" in query:
                     speak("Goodbye, sir. Have a great day!")
-                    sys.exit()  
+                    sys.exit()
+                elif "turn on light" in query and arduino:
+                    arduino.write(b"turn on light\n")
+                    speak("Turning on the light.")
+                elif "turn off light" in query and arduino:
+                    arduino.write(b"turn off light\n")
+                    speak("Turning off the light.")
 
                 # logic building for tasks
     #1 notepad
@@ -102,7 +102,7 @@ if __name__=="__main__":
                 #     os.system("taskkill /f im notepad.exe")
                 #     speak("Closing notepad sir")
                 elif " close notepad" in query:
-                    notepad_windows = gw.getWindowsWithUntitle('Notepad')
+                    notepad_windows = gw.getWindowsWithUntitle('Notepad') 
                     for window in notepad_windows:
                         window.close()
                     speak("Notepad is now closed.")
@@ -133,7 +133,7 @@ if __name__=="__main__":
                 elif "yes" in query:
                     speak("It's my pleasure sir")
                 elif "no "in query:
-                    speak("Sorry sir, I will come up with something else"
+                    speak("Sorry sir, I will come up with something else")
 
     #5 webbrowser
                  #OR use the below
@@ -170,5 +170,3 @@ if __name__=="__main__":
                 elif 'joke' in query:
                     joke = pyjokes.get_joke()
                     speak(joke)
-                
-
