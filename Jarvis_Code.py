@@ -10,7 +10,9 @@ import sys
 import pyjokes
 import serial  # For communicating with Arduino
 import akinator  # For Akinator integration
-
+import pywhatkit
+from plyer import notification
+import feedparser
 # Initialize serial communication with Arduino
 try:
     arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)  # Replace 'COM3' with your Arduino port
@@ -42,6 +44,31 @@ def takecommand():
     except Exception as e:
         return "none"
     return query.lower()
+
+def send_whatsapp_message():
+    speak("Who should I send the message to? Please provide the phone number with country code.")
+    phone_number = takecommand().replace(" ", "")
+    if phone_number == "none":
+        speak("Sorry, I didn't catch that.")
+        return
+    speak("What message would you like to send?")
+    message = takecommand()
+    if message == "none":
+        speak("I didn't hear the message clearly.")
+        return
+    speak(f"Sending your message to {phone_number}")
+    pywhatkit.sendwhatmsg_instantly(f"+{phone_number}", message)
+    speak("Message sent successfully.")
+
+def make_whatsapp_call():
+    speak("Who should I call? Please provide the phone number with country code.")
+    phone_number = takecommand().replace(" ", "")
+    if phone_number == "none":
+        speak("Sorry, I didn't catch that.")
+        return
+    speak(f"Calling {phone_number}")
+    pywhatkit.sendwhatmsg_instantly(f"+{phone_number}", "", tab_close=True)
+    speak("Call initiated.")
 
 def get_date_time():
     now = datetime.now()
@@ -143,6 +170,28 @@ def play_akinator():
         print(f"Error: {e}")
 
 
+def check_notifications():
+    speak("Checking notifications...")
+    try:
+        notification.notify(
+            title="Jarvis Notification",
+            message="Currently, I cannot read system notifications directly, but I can notify you of scheduled tasks!",
+            timeout=5
+        )
+        speak("I have displayed a notification, but you may need an external tool to fetch system notifications.")
+    except Exception as e:
+        speak("I couldn't retrieve notifications. Please check system settings.")
+
+
+def get_news():
+    url = "https://news.google.com/rss"  # Google News RSS feed
+    news_feed = feedparser.parse(url)
+
+    speak("Here are the top news headlines for today:")
+    for i, entry in enumerate(news_feed.entries[:5], 1):
+        speak(f"News {i}: {entry.title}")
+        print(f"News {i}: {entry.title}")
+
 
 
 if __name__ == "__main__":
@@ -157,13 +206,24 @@ if __name__ == "__main__":
                     break
                 elif "exit" in query or "stop" in query:
                     speak("Goodbye, sir. Have a great day!")
+                    sys.exit()
+                elif "check notifications" in query:
+                    check_notifications()
+                elif "send a whatsapp message" in query:
+                    send_whatsapp_message()
+                elif "call" in query:
+                    make_whatsapp_call()
+                elif "news update" in query or "daily news" in query:
+                    get_news()
+
                 elif "lights on" in query and arduino:
                     arduino.write(b"turn on light\n")
+                    
                     speak("Turning on the light.")
                 elif "lights off" in query and arduino:
                     arduino.write(b"turn off light\n")
                     speak("Turning off the light.")
-                    sys.exit()
+                    
                 elif "play akinator" in query:
                     play_akinator()
                 elif "weather in" in query:
