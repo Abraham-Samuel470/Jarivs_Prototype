@@ -9,6 +9,7 @@ import webbrowser
 import sys
 import pyjokes
 import serial  # For communicating with Arduino
+import akinator  # For Akinator integration
 
 # Initialize serial communication with Arduino
 try:
@@ -64,6 +65,86 @@ def jarvis_greeting():
         speak("Sir, it's almost bedtime. You should pack things up.")
     speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
 
+# Weather Forecast Function
+def get_weather(city):
+    API_KEY = "9b8eee7b7de6bcfe4740337c7a786cb1"  # Replace with your OpenWeatherMap API key
+    BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+    
+    try:
+        params = {
+            "q": city,
+            "appid": API_KEY,
+            "units": "metric"
+        }
+        response = requests.get(BASE_URL, params=params)
+        data = response.json()
+
+        if data["cod"] == 200:
+            main = data["main"]
+            weather = data["weather"][0]
+            temp = main["temp"]
+            description = weather["description"]
+            humidity = main["humidity"]
+            wind_speed = data["wind"]["speed"]
+
+            speak(f"The current temperature in {city} is {temp} degrees Celsius.")
+            speak(f"The weather is {description}. Humidity is {humidity}% and the wind speed is {wind_speed} meters per second.")
+        else:
+            speak("Sorry, I couldn't find weather information for that location. Please try again.")
+    except Exception as e:
+        speak("There was an error fetching the weather details. Please try later.")
+
+# Akinator Game
+import akinator
+
+def play_akinator():
+    try:
+        aki = akinator.Akinator()
+        speak("Think of a character, and I will try to guess it. Say 'Stop' anytime to exit the game.")
+        question = aki.start_game()
+        
+        while True:
+            speak(question)
+            answer = takecommand().lower()
+            
+            if "yes" in answer:
+                question = aki.answer("yes")
+            elif "no" in answer:
+                question = aki.answer("no")
+            elif "don't know" in answer or "not sure" in answer:
+                question = aki.answer("idk")
+            elif "probably" in answer:
+                question = aki.answer("probably")
+            elif "probably not" in answer:
+                question = aki.answer("probably not")
+            elif "stop" in answer:
+                speak("Exiting Akinator. You can play again anytime!")
+                break
+            else:
+                speak("Please answer with yes, no, don't know, probably, or probably not.")
+
+            if aki.progression >= 80:
+                speak("I think I know who you are thinking of.")
+                aki.win()
+                speak(f"Is it {aki.first_guess['name']}? {aki.first_guess['description']}")
+                answer = takecommand().lower()
+                if "yes" in answer:
+                    speak("Yay! I guessed it right!")
+                else:
+                    speak("Oh no! I'll try better next time.")
+                break
+    
+    except akinator.NoMoreQuestions:
+        speak("No questions left to ask. Let me make my guess.")
+        aki.win()
+        speak(f"My guess is {aki.first_guess['name']} - {aki.first_guess['description']}.")
+    except Exception as e:
+        speak("An error occurred while playing Akinator.")
+        print(f"Error: {e}")
+
+
+
+
 if __name__ == "__main__":
     while True:
         query = takecommand()
@@ -76,13 +157,25 @@ if __name__ == "__main__":
                     break
                 elif "exit" in query or "stop" in query:
                     speak("Goodbye, sir. Have a great day!")
-                    sys.exit()
-                elif "turn on light" in query and arduino:
+                elif "lights on" in query and arduino:
                     arduino.write(b"turn on light\n")
                     speak("Turning on the light.")
-                elif "turn off light" in query and arduino:
+                elif "lights off" in query and arduino:
                     arduino.write(b"turn off light\n")
                     speak("Turning off the light.")
+                    sys.exit()
+                elif "play akinator" in query:
+                    play_akinator()
+                elif "weather in" in query:
+                    city = query.replace("weather in", "").strip()
+                    get_weather(city)
+                elif 'joke' in query:
+                    joke = pyjokes.get_joke()
+                    speak(joke)
+                # Add more functionalities as needed
+
+
+
 
                 # logic building for tasks
     #1 notepad
