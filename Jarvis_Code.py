@@ -4,7 +4,7 @@ import speech_recognition as sr
 import pyaudio
 from datetime import datetime
 import wikipedia
-import requests
+import requests 
 import webbrowser
 import sys
 import pyjokes
@@ -13,9 +13,15 @@ import akinator  # For Akinator integration
 import pywhatkit
 from plyer import notification
 import feedparser
+import ollama
+
+
+
+
+
 # Initialize serial communication with Arduino
 try:
-    arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)  # Replace 'COM3' with your Arduino port
+    arduino = serial.Serial(port='COM10', baudrate=9600, timeout=1)  # Replace 'COM3' with your Arduino port
     print("Connected to Arduino")
 except Exception as e:
     print("Could not connect to Arduino. Ensure the correct port is specified.")
@@ -192,6 +198,14 @@ def get_news():
         speak(f"News {i}: {entry.title}")
         print(f"News {i}: {entry.title}")
 
+# Chat function for TinyLLaMA interaction
+def chat_with_tinyllama(prompt):
+    try:
+        response = ollama.chat(model="tinyllama", messages=[{'role': 'user', 'content': prompt}])
+        return response['message']['content']
+    except Exception as e:
+        print(f"Error communicating with TinyLLaMA: {e}")
+        return "I'm sorry, I couldn't understand that."
 
 
 if __name__ == "__main__":
@@ -216,14 +230,51 @@ if __name__ == "__main__":
                 elif "news update" in query or "daily news" in query:
                     get_news()
 
-                elif "lights on" in query and arduino:
-                    arduino.write(b"turn on light\n")
+                elif "turn on light one" in query and arduino:
+                    arduino.write(b"turn on light1\n")
+                    speak("Turning on the light one.")
+                elif "turn off light one" in query and arduino:
+                    arduino.write(b"turn off light1\n")
+                    speak("Turning off the light one.")
+                    #LED2
+                elif "turn on light two" in query and arduino or "turn on light 2" in query and arduino:
+                    arduino.write(b"turn on light2\n")
+                    speak("Turning on the light two.")
+                elif "turn off light two" in query and arduino or "turn off light 2" in query and arduino:
+                    arduino.write(b"turn off light2\n")
+                    speak("Turning off the light two.")
+                    #LED3
+                elif "turn on light three" in query and arduino or "turn on light 3" in query and arduino:
+                    arduino.write(b"turn on light3\n")
+                    speak("Turning on the light three.")
+                elif "tur off light three" in query and arduino or "turn off light 3" in query and arduino:
+                    arduino.write(b"turn off light3\n")
+                    speak("Turning off the light three.")
+                    #LED4
+                elif "turn on light four" in query and arduino or "turn on light 4" in query and arduino:
+                    arduino.write(b"turn on light4\n")
+                    speak("Turning on the light four.")
+                elif "turn off light four" in query and arduino or "turn off light 4" in query and arduino:
+                    arduino.write(b"turn off light4\n")
+                    speak("Turning off the light four.")
                     
-                    speak("Turning on the light.")
-                elif "lights off" in query and arduino:
-                    arduino.write(b"turn off light\n")
-                    speak("Turning off the light.")
-                    
+                # Chat with TinyLLaMA
+                elif "let's chat" in query or "talk to me" in query:
+                    speak("Let's chat, Sir. What would you like to discuss?")
+                    while True:
+                        user_input = takecommand().lower()
+                        if "go to sleep" in user_input or "exit" in user_input:
+                            speak("Goodbye, Sir. You can call me anytime.")
+                            break
+                        elif "stop" in user_input:
+                            speak("Shutting down. Have a great day!")
+                            sys.exit()
+                        else:
+                            response = chat_with_tinyllama(user_input)
+                            speak("Here's what i found sir")
+                            print(response)
+
+
                 elif "play akinator" in query:
                     play_akinator()
                 elif "weather in" in query:
