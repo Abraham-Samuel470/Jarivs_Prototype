@@ -18,7 +18,6 @@ import ollama
 
 
 
-
 # Initialize serial communication with Arduino
 try:
     arduino = serial.Serial(port='COM10', baudrate=9600, timeout=1)  # Replace 'COM3' with your Arduino port
@@ -37,19 +36,34 @@ def speak(audio):
     print(audio)
     engine.runAndWait()
 
+import speech_recognition as sr
+
 def takecommand():
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
         r.pause_threshold = 1
-        audio = r.listen(source, timeout=7, phrase_time_limit=5)
+        try:
+            audio = r.listen(source, timeout=9, phrase_time_limit=7)
+        except sr.WaitTimeoutError:
+            print("Sir, I could not hear you.")
+            return "none"
+    
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language='en-in')
         print(f"User said: {query}")
-    except Exception as e:
+        return query.lower()
+    except sr.UnknownValueError:
+        print("Sorry, I didn't understand that.")
         return "none"
-    return query.lower()
+    except sr.RequestError:
+        print("Could not connect to the recognition service.")
+        return "none"
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return "none"
+
 
 def send_whatsapp_message():
     speak("Who should I send the message to? Please provide the phone number with country code.")
@@ -96,7 +110,7 @@ def jarvis_greeting():
         speak("Good evening, sir.")
     elif hour >= 21 and hour < 23:
         speak("Sir, it's almost bedtime. You should pack things up.")
-    speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
+    # speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
 
 # Weather Forecast Function
 def get_weather(city):
@@ -221,42 +235,50 @@ if __name__ == "__main__":
                 elif "exit" in query or "stop" in query:
                     speak("Goodbye, sir. Have a great day!")
                     sys.exit()
+                elif "what time is it" in query:
+                    time=datetime.now().strftime("%I:%M %p")
+                    speak(f"Sir the current time is {time}.")
+                elif "what day is today" in query:
+                    
+                    day,date,time=get_date_time()
+                    speak(f"Today is {day}, the date is {date}, and the current time is {time}.")
                 elif "check notifications" in query:
                     check_notifications()
                 elif "send a whatsapp message" in query:
                     send_whatsapp_message()
                 elif "call" in query:
                     make_whatsapp_call()
-                elif "news update" in query or "daily news" in query:
+                elif "news update" in query or "daily news" in query or "what is today's news" in query:
                     get_news()
 
-                elif "turn on light one" in query and arduino:
+                elif ("turn on green light" in query or "green light on" in query) and arduino:  # pin 7
                     arduino.write(b"turn on light1\n")
-                    speak("Turning on the light one.")
-                elif "turn off light one" in query and arduino:
+                    speak("Turning on green light.")
+                elif ("turn off green light" in query or "green light off" in query) and arduino:
                     arduino.write(b"turn off light1\n")
-                    speak("Turning off the light one.")
+                    speak("Turning off green light.")
+
                     #LED2
-                elif "turn on light two" in query and arduino or "turn on light 2" in query and arduino:
+                elif "turn on fan" in query and arduino or "fan on" in query and arduino:#pin 8
                     arduino.write(b"turn on light2\n")
-                    speak("Turning on the light two.")
-                elif "turn off light two" in query and arduino or "turn off light 2" in query and arduino:
+                    speak("Turning on the fan, sir.")
+                elif "turn off fan" in query and arduino or "fan off" in query and arduino:
                     arduino.write(b"turn off light2\n")
-                    speak("Turning off the light two.")
+                    speak("Turning off the fan, sir.")
                     #LED3
-                elif "turn on light three" in query and arduino or "turn on light 3" in query and arduino:
+                elif "turn on white light" in query and arduino or "white light on" in query and arduino: #9
                     arduino.write(b"turn on light3\n")
-                    speak("Turning on the light three.")
-                elif "tur off light three" in query and arduino or "turn off light 3" in query and arduino:
+                    speak("Turning on white light.")
+                elif "tur off white light" in query and arduino or "white light off" in query and arduino:
                     arduino.write(b"turn off light3\n")
-                    speak("Turning off the light three.")
+                    speak("Turning off white light.")
                     #LED4
-                elif "turn on light four" in query and arduino or "turn on light 4" in query and arduino:
+                elif "turn on yellow light" in query and arduino or "yellow light on" in query and arduino: #10 yellow
                     arduino.write(b"turn on light4\n")
-                    speak("Turning on the light four.")
-                elif "turn off light four" in query and arduino or "turn off light 4" in query and arduino:
+                    speak("Turning on yellow light.")
+                elif "turn off yellow light " in query and arduino or "yellow light off" in query and arduino:
                     arduino.write(b"turn off light4\n")
-                    speak("Turning off the light four.")
+                    speak("Turning off yellow light.")
                     
                 # Chat with TinyLLaMA
                 elif "let's chat" in query or "talk to me" in query:
